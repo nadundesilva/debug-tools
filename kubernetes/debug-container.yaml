@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debug-container
+  labels:
+    app: debug-container
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debug-container
+  template:
+    metadata:
+      labels:
+        app: debug-container
+    spec:
+      containers:
+      - name: http-port
+        image: ghcr.io/nadundesilva/tools/debug-container:latest

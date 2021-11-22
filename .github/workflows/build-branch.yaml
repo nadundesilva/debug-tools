@@ -3,8 +3,8 @@ name: Build Branch
 on: [push, pull_request]
 
 jobs:
-  build:
-    name: Build Docker Image
+  build-request-debugger:
+    name: Build Request Debugger
     runs-on: ubuntu-20.04
     permissions:
       packages: write
@@ -23,3 +23,24 @@ jobs:
           context: ./request-debugger
           push: true
           tags: ghcr.io/nadundesilva/tools/request-debugger:latest
+
+  build-debug-container:
+    name: Build Debug Container
+    runs-on: ubuntu-20.04
+    permissions:
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Login to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./debug-container
+          push: true
+          tags: ghcr.io/nadundesilva/tools/debug-container:latest
