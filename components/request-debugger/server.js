@@ -15,8 +15,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
-const PORT = 8080;
-const HOST = "0.0.0.0";
+const HOST = process.env.SERVER_HOST || "0.0.0.0";
+const PORT = process.env.SERVER_PORT || 8080;
+const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200
 
 var app = express();
 
@@ -36,6 +37,7 @@ app.all("/*", (req, res) => {
         signedCookies: req.signedCookies
     };
     console.log(JSON.stringify(requestLog));
+    res.status(STATUS_CODE);
     res.send("Hello from Request Debugger");
 });
 
