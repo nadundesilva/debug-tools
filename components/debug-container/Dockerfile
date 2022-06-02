@@ -1,7 +1,9 @@
 FROM ubuntu:20.04
 
-RUN apt update && \
-    apt upgrade -y && \
-    apt install -y curl wget telnet
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends curl wget telnet && \
+    rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["sleep", "infinity"]

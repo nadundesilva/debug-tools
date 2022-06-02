@@ -17,37 +17,39 @@ const cookieParser = require("cookie-parser");
 
 const HOST = process.env.SERVER_HOST || "0.0.0.0";
 const PORT = process.env.SERVER_PORT || 8080;
-const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200
+const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200;
 
 var app = express();
 
-app.use(bodyParser.text({
-    type: "*/*"
-}));
+app.use(
+  bodyParser.text({
+    type: "*/*",
+  })
+);
 app.use(cookieParser());
 
 app.all("/*", (req, res) => {
-    const requestLog = {
-        method: req.method,
-        protocol: req.protocol,
-        path: req.originalUrl,
-        headers: req.headers,
-        body: req.body,
-        cookies: req.cookies,
-        signedCookies: req.signedCookies
-    };
-    console.log(JSON.stringify(requestLog));
-    res.status(STATUS_CODE);
-    res.send("Hello from Request Debugger");
+  const requestLog = {
+    method: req.method,
+    protocol: req.protocol,
+    path: req.originalUrl,
+    headers: req.headers,
+    body: req.body,
+    cookies: req.cookies,
+    signedCookies: req.signedCookies,
+  };
+  console.log(JSON.stringify(requestLog));
+  res.status(STATUS_CODE);
+  res.send("Hello from Request Debugger");
 });
 
 const server = app.listen(PORT, HOST, () => {
-    console.log(`Running on http://${HOST}:${PORT}`);
+  console.log(`Running on http://${HOST}:${PORT}`);
 });
 
 process.on("SIGTERM", () => {
-    console.log("Shutting down HTTP server");
-    server.close(() => {
-      console.log("HTTP server successfully shutdown");
-    });
+  console.log("Shutting down HTTP server");
+  server.close(() => {
+    console.log("HTTP server successfully shutdown");
+  });
 });
