@@ -79,6 +79,19 @@ jobs:
               with:
                   username: nadunrds
                   password: ${{ secrets.DOCKER_HUB_TOKEN }}
+            - name: Build Docker Image for scanning
+              uses: docker/build-push-action@v3
+              with:
+                  context: ./components/${{ matrix.tool }}
+                  load: true
+                  tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                  image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
+                  format: 'table'
+                  exit-code: '1'
+                  ignore-unfixed: true
             - name: Build & Push Docker Image
               uses: docker/build-push-action@v3
               with:
