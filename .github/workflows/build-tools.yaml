@@ -28,10 +28,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.x'
       - name: Run OSSAR
         uses: github/ossar-action@v1
         id: ossar

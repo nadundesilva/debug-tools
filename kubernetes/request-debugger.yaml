@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: request-debugger
-        image: ghcr.io/nadundesilva/tools/request-debugger:latest
+        image: nadunrds/debug-tools-request-debugger:latest
         ports:
         - name: http-port
           containerPort: 8080

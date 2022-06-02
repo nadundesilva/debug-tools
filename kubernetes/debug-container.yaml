@@ -16,4 +16,4 @@ spec:
     spec:
       containers:
       - name: http-port
-        image: ghcr.io/nadundesilva/tools/debug-container:latest
+        image: nadunrds/debug-tools-debug-container:latest
