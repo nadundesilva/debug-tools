@@ -1,19 +1,26 @@
-name: Build
+name: Deploy Site
 
-on: [push, pull_request]
+on:
+    - push
+    - pull_request
 
 jobs:
     run-super-linter:
         name: Run GitHub Super Linter
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: read
+            statuses: write
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0
             - name: Lint Code Base
-              uses: github/super-linter@v4
+              uses: super-linter/super-linter@v7
               env:
+                  DEFAULT_BRANCH: main
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   JAVASCRIPT_DEFAULT_STYLE: prettier
 
@@ -26,7 +33,7 @@ jobs:
             security-events: write
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v2
               with:
@@ -41,7 +48,7 @@ jobs:
         runs-on: windows-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Run OSSAR
               uses: github/ossar-action@v1
               id: ossar
@@ -52,7 +59,8 @@ jobs:
 
     build-tools:
         name: Build Tools
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         needs:
             - run-codeql-analysis
             - run-ossar-analysis
@@ -64,7 +72,7 @@ jobs:
                     - "debug-container"
         steps:
             - name: Checkout Code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v2
             - name: Set up Docker Buildx
