@@ -4,6 +4,8 @@ on:
   - push
   - pull_request
 
+permissions: read-all
+
 jobs:
   run-super-linter:
     name: Run GitHub Super Linter
@@ -93,6 +95,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./components/${{ matrix.tool }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
