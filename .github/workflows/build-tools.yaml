@@ -1,109 +1,98 @@
 name: Build
 
 on:
-    - push
-    - pull_request
+  - push
+  - pull_request
 
 jobs:
-    run-super-linter:
-        name: Run GitHub Super Linter
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: read
-            statuses: write
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - name: Lint Code Base
-              uses: super-linter/super-linter@v7
-              env:
-                  DEFAULT_BRANCH: main
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  JAVASCRIPT_DEFAULT_STYLE: prettier
+  run-super-linter:
+    name: Run GitHub Super Linter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: super-linter/super-linter@v7
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JAVASCRIPT_DEFAULT_STYLE: prettier
+          VALIDATE_JAVASCRIPT_STANDARD: "false"
 
-    run-codeql-analysis:
-        name: Run CodeQL Analysis
-        runs-on: ubuntu-latest
-        permissions:
-            actions: read
-            contents: read
-            security-events: write
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-            - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
-              with:
-                languages: javascript
-            - name: Autobuild
-              uses: github/codeql-action/autobuild@v3
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+  run-vulnerability-analysis:
+    name: Run Vulnerability Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          vuln-type: library
+          exit-code: 1
+          format: sarif
+          output: trivy-results.sarif
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
 
-    run-ossar-analysis:
-        name: Run OSSAR Analysis
-        runs-on: windows-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-            - name: Run OSSAR
-              uses: github/ossar-action@v1
-              id: ossar
-            - name: Upload OSSAR results
-              uses: github/codeql-action/upload-sarif@v3
-              with:
-                  sarif_file: ${{ steps.ossar.outputs.sarifFile }}
-
-    build-tools:
-        name: Build Tools
-        runs-on: ubuntu-latest
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        needs:
-            - run-codeql-analysis
-            - run-ossar-analysis
-            - run-super-linter
-        strategy:
-            matrix:
-                tool:
-                    - "request-debugger"
-                    - "debug-container"
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-            - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
-            - name: Set up Docker Buildx
-              id: buildx
-              uses: docker/setup-buildx-action@v3
-              with:
-                  install: true
-            - name: Available platforms
-              run: echo ${{ steps.buildx.outputs.platforms }}
-            - name: Login to the Container registry
-              uses: docker/login-action@v3
-              with:
-                  username: nadunrds
-                  password: ${{ secrets.DOCKER_HUB_TOKEN }}
-            - name: Build Docker Image for scanning
-              uses: docker/build-push-action@v6
-              with:
-                  context: ./components/${{ matrix.tool }}
-                  load: true
-                  tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
-            - name: Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@master
-              with:
-                  image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
-                  format: 'table'
-                  exit-code: '1'
-                  ignore-unfixed: true
-            - name: Build & Push Docker Image
-              uses: docker/build-push-action@v6
-              with:
-                  context: ./components/${{ matrix.tool }}
-                  platforms: linux/amd64,linux/arm64,linux/arm/v7
-                  push: true
-                  tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
+  build-tools:
+    name: Build Tools
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs:
+      - run-super-linter
+      - run-vulnerability-analysis
+    strategy:
+      matrix:
+        tool:
+          - "request-debugger"
+          - "debug-container"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Login to the Container registry
+        uses: docker/login-action@v3
+        with:
+          username: nadunrds
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Build Docker Image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./components/${{ matrix.tool }}
+          load: true
+          tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true
+      - name: Build & Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./components/${{ matrix.tool }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: nadunrds/debug-tools-${{ matrix.tool }}:latest

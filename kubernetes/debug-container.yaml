@@ -15,5 +15,5 @@ spec:
         app: debug-container
     spec:
       containers:
-      - name: http-port
-        image: nadunrds/debug-tools-debug-container:latest
+        - name: http-port
+          image: nadunrds/debug-tools-debug-container:latest

@@ -1,18 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-      "config:recommended",
-      "mergeConfidence:all-badges",
-      ":rebaseStalePrs",
-      ":separateMajorReleases",
-      ":reviewer(nadundesilva)"
+    "config:recommended",
+    "mergeConfidence:all-badges",
+    ":rebaseStalePrs",
+    ":separateMajorReleases",
+    ":reviewer(nadundesilva)"
   ],
   "labels": ["Type/DependencyUpdate"],
   "packageRules": [
-      {
-          "matchUpdateTypes": ["patch", "minor"],
-          "groupName": "Non-Major Updates",
-          "automerge": true
-      }
+    {
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "Non-Major Updates",
+      "automerge": true
+    }
   ]
 }

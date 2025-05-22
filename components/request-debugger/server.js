@@ -19,12 +19,12 @@ const HOST = process.env.SERVER_HOST || "0.0.0.0";
 const PORT = process.env.SERVER_PORT || 8080;
 const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200;
 
-var app = express();
+const app = express();
 
 app.use(
   bodyParser.text({
     type: "*/*",
-  })
+  }),
 );
 app.use(cookieParser());
 
