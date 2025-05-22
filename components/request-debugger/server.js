@@ -12,23 +12,30 @@
  */
 
 const express = require("express");
-const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
-const HOST = process.env.SERVER_HOST || "0.0.0.0";
-const PORT = process.env.SERVER_PORT || 8080;
+const BIND_HOST = process.env.SERVER_BIND_HOST || "0.0.0.0";
+const BIND_PORT = process.env.SERVER_BIND_PORT || 8080;
+const HEALTHCHECK_PATH = process.env.HEALTH_CHECK_PATH || "/_internal/health";
 const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200;
 
 const app = express();
 
+app.use(express.json());
+
+app.get(HEALTHCHECK_PATH, (req, res) => {
+  res.status(200);
+  res.send({ status: "OK" });
+});
+
 app.use(
-  bodyParser.text({
+  express.text({
     type: "*/*",
   }),
 );
 app.use(cookieParser());
 
-app.all("/*", (req, res) => {
+app.all("*path", (req, res) => {
   const requestLog = {
     method: req.method,
     protocol: req.protocol,
@@ -43,8 +50,12 @@ app.all("/*", (req, res) => {
   res.send("Hello from Request Debugger");
 });
 
-const server = app.listen(PORT, HOST, () => {
-  console.log(`Running on http://${HOST}:${PORT}`);
+const server = app.listen(BIND_PORT, BIND_HOST, (err) => {
+  if (err) {
+    console.log(`Error starting server: ${err}`);
+  } else {
+    console.log(`Running on http://${BIND_HOST}:${BIND_PORT}`);
+  }
 });
 
 process.on("SIGTERM", () => {

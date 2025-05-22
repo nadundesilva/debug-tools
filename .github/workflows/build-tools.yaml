@@ -4,6 +4,8 @@ on:
   - push
   - pull_request
 
+permissions: read-all
+
 jobs:
   run-super-linter:
     name: Run GitHub Super Linter
