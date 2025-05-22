@@ -1,4 +1,4 @@
-FROM ubuntu:22.10
+FROM ubuntu:kinetic-20230624
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
