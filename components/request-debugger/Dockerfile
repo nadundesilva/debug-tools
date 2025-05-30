@@ -4,18 +4,32 @@ FROM node:24.1.0-alpine3.21
 ARG NPM_VERSION="10.9.2"
 
 RUN <<EOF
-apk update
-apk upgrade
+set -eu
 
-addgroup -S -g 30000 request-debugger
-adduser -S -u 10000 -G request-debugger request-debugger
+echo "Creating Users"
+addgroup -S \
+    -g 30000 \
+    debug-tools
+adduser -S \
+    -u 10000 \
+    -G debug-tools \
+    -s /bin/ash \
+    request-debugger
 EOF
 
-COPY --chown=request-debugger . /app
-WORKDIR /app
+COPY . /server
+WORKDIR /server
 
-RUN npm i -g "npm@${NPM_VERSION}" && \
-    npm ci
+RUN <<EOF
+set -eu
+
+echo "Installing Request Debugger dependencies"
+npm i -g "npm@${NPM_VERSION}"
+npm ci
+chown 10000:30000 /server
+EOF
+
+USER 10000:30000
 
 ENV SERVER_BIND_HOST="0.0.0.0"
 ENV SERVER_BIND_PORT="8080"
@@ -27,7 +41,6 @@ HEALTHCHECK --start-period=10s \
     --timeout=10s \
     CMD curl -f "http://${SERVER_BIND_HOST}:${SERVER_BIND_PORT}${HEALTHCHECK_PATH}" || exit 1
 
-USER request-debugger
 EXPOSE 8080
 
 ENTRYPOINT ["npm", "run", "start"]

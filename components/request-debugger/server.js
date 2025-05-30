@@ -59,7 +59,7 @@ const server = app.listen(BIND_PORT, BIND_HOST, (err) => {
 });
 
 process.on("SIGTERM", () => {
-  console.log("Shutting down HTTP server");
+  console.log("SIGTERM Received: Shutting down HTTP server");
   server.close(() => {
     console.log("HTTP server successfully shutdown");
   });

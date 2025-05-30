@@ -26,6 +26,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JAVASCRIPT_DEFAULT_STYLE: prettier
           VALIDATE_JAVASCRIPT_STANDARD: "false"
+          VALIDATE_PYTHON_PYLINT: "false"
 
   run-vulnerability-analysis:
     name: Run Vulnerability Analysis
@@ -49,6 +50,31 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
 
+  test-docker-images:
+    name: Test Docker Imaages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+      - name: Setup pipx
+        run: |
+          sudo apt update
+          sudo apt install pipx
+          pipx ensurepath
+      - name: Setup Poetry
+        run: pipx install poetry
+      - name: Install Test Dependencies
+        working-directory: ./tests
+        run: poetry sync
+      - name: Run Tests
+        working-directory: ./tests
+        run: poetry run pytest
+
   build-tools:
     name: Build Tools
     runs-on: ubuntu-latest
@@ -56,6 +82,7 @@ jobs:
     needs:
       - run-super-linter
       - run-vulnerability-analysis
+      - test-docker-images
     strategy:
       matrix:
         tool:

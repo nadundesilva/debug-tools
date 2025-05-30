@@ -26,9 +26,9 @@ spec:
             - name: http-port
               containerPort: 8080
           env:
-            - name: SERVER_HOST
+            - name: SERVER_BIND_HOST
               value: "0.0.0.0"
-            - name: SERVER_PORT
+            - name: SERVER_BIND_PORT
               value: "8080"
             - name: STATUS_CODE
               value: "200"
@@ -40,7 +40,8 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           readinessProbe:
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: http-port
             initialDelaySeconds: 10
             periodSeconds: 10
