@@ -53,6 +53,9 @@ jobs:
   test-docker-images:
     name: Test Docker Imaages
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./tests
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -69,10 +72,10 @@ jobs:
       - name: Setup Poetry
         run: pipx install poetry
       - name: Install Test Dependencies
-        working-directory: ./tests
         run: poetry sync
+      - name: Validate Types in Tests
+        run: poetry run mypy .
       - name: Run Tests
-        working-directory: ./tests
         run: poetry run pytest
 
   build-tools:
