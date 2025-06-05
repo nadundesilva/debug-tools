@@ -15,6 +15,7 @@ set -eu
 apt-get update -y
 apt-get upgrade -y
 
+echo "Installing Debug Tools"
 apt-get install -y --no-install-recommends \
     curl="${CURL_VERSION}" \
     wget="${WGET_VERSION}" \
