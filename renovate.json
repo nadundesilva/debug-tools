@@ -8,6 +8,7 @@
     ":reviewer(nadundesilva)"
   ],
   "labels": ["Type/DependencyUpdate"],
+  "rangeStrategy": "bump",
   "packageRules": [
     {
       "matchUpdateTypes": ["patch", "minor"],

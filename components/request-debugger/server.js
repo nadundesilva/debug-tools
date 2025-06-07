@@ -14,10 +14,50 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
+const RESPONSE_CONTENT_HELLO = "HELLO";
+const RESPONSE_CONTENT_REQUEST_PROPERTIES = "REQUEST_PROPERTIES";
+
 const BIND_HOST = process.env.SERVER_BIND_HOST || "0.0.0.0";
 const BIND_PORT = process.env.SERVER_BIND_PORT || 8080;
 const HEALTHCHECK_PATH = process.env.HEALTH_CHECK_PATH || "/_internal/health";
-const STATUS_CODE = parseInt(process.env.STATUS_CODE, 10) || 200;
+const RESPONSE_STATUS_CODE =
+  parseInt(process.env.RESPONSE_STATUS_CODE, 10) || 200;
+const RESPONSE_CONTENT = process.env.RESPONSE_CONTENT || RESPONSE_CONTENT_HELLO;
+
+const buildDebugRequestObject = (req) => {
+  return {
+    protocol: req.protocol,
+    method: req.method,
+    path: req.originalUrl,
+
+    headers: req.headers,
+    cookies: req.cookies,
+    body: req.body,
+  };
+};
+
+let respond = (req, res) => {
+  res.status(500);
+  res.json({ message: "Response not supported" });
+};
+switch (RESPONSE_CONTENT) {
+  case RESPONSE_CONTENT_HELLO:
+    respond = (req, res) => {
+      res.status(RESPONSE_STATUS_CODE);
+      res.json({ message: "Hello from Request Debugger" });
+    };
+    break;
+  case RESPONSE_CONTENT_REQUEST_PROPERTIES:
+    respond = (req, res) => {
+      res.status(RESPONSE_STATUS_CODE);
+      res.json(buildDebugRequestObject(req));
+    };
+    break;
+  default:
+    throw Error(
+      `Unknown value for environment variable RESPONSE_CONTENT: ${RESPONSE_CONTENT}`,
+    );
+}
 
 const app = express();
 
@@ -36,18 +76,8 @@ app.use(
 app.use(cookieParser());
 
 app.all("*path", (req, res) => {
-  const requestLog = {
-    method: req.method,
-    protocol: req.protocol,
-    path: req.originalUrl,
-    headers: req.headers,
-    body: req.body,
-    cookies: req.cookies,
-    signedCookies: req.signedCookies,
-  };
-  console.log(JSON.stringify(requestLog));
-  res.status(STATUS_CODE);
-  res.send("Hello from Request Debugger");
+  console.log(JSON.stringify(buildDebugRequestObject(req)));
+  respond(req, res);
 });
 
 const server = app.listen(BIND_PORT, BIND_HOST, (err) => {
