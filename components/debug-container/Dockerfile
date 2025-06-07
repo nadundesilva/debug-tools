@@ -8,35 +8,27 @@ ARG WGET_VERSION="1.21.4-1ubuntu4.1"
 # renovate: datasource=repology depName=ubuntu_24_04/telnet
 ARG TELNET_VERSION="0.17+2.5-3ubuntu4"
 
-# hadolint ignore=DL3008
-RUN <<EOF
-set -eu
+ARG USER_ID="10000"
+ARG GROUP_ID="30000"
 
-apt-get update -y
-apt-get upgrade -y
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        curl="${CURL_VERSION}" \
+        wget="${WGET_VERSION}" \
+        telnet="${TELNET_VERSION}" && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    groupadd -r \
+        -g ${GROUP_ID} \
+        debug-tools && \
+    useradd -r -m -l \
+        -u ${USER_ID} \
+        -g ${GROUP_ID} \
+        -s /bin/bash \
+        -d /home/request-debugger \
+        debug-user
 
-echo "Installing Debug Tools"
-apt-get install -y --no-install-recommends \
-    curl="${CURL_VERSION}" \
-    wget="${WGET_VERSION}" \
-    telnet="${TELNET_VERSION}"
-
-echo "Creating Users"
-groupadd -r \
-    -g 30000 \
-    debug-tools
-useradd -r -m \
-    -u 10000 \
-    -g debug-tools \
-    -s /bin/bash \
-    -d /home/request-debugger \
-    debug-user
-
-echo "Cleaning Up"
-apt-get clean -y
-rm -rf /var/lib/apt/lists/*
-EOF
-
-USER 10000:30000
+SHELL ["/bin/bash", "-c"]
+USER ${USER_ID}:${GROUP_ID}
 
 ENTRYPOINT ["sleep", "infinity"]
