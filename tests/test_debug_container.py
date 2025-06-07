@@ -7,6 +7,8 @@ import pytest
 
 from .utils import build_image, wait_for_container
 
+installed_tools = ["curl", "wget", "telnet"]
+
 
 @pytest.fixture(scope="module")
 def debug_container_image(
@@ -28,8 +30,7 @@ def test_debug_container(
     container = docker_client.containers.run(image=debug_container_image, detach=True)
     wait_for_container(container)
 
-    expected_tools = ["curl", "wget", "telnet"]
-    for tool in expected_tools:
+    for tool in installed_tools:
         print(f"Checking if {tool} is installed")
         exit_code, output = container.exec_run(
             ["/bin/bash", "-c", f"command -v {tool}"],

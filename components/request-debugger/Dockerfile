@@ -2,7 +2,7 @@ FROM node:24.1.0-alpine3.22
 
 # renovate: datasource=repology depName=alpine_3_22/curl
 ARG CURL_VERSION="8.14.1-r0"
-# renovate: datasource=npm packageName=npm
+# renovate: datasource=npm depName=npm
 ARG NPM_VERSION="10.9.2"
 
 ARG USER_ID="10000"
@@ -24,8 +24,7 @@ RUN apk update && \
 COPY --chown=${USER_ID}:${GROUP_ID} . /server
 WORKDIR /server
 
-RUN npm i -g "npm@${NPM_VERSION}" && \
-    npm ci
+RUN npm ci
 
 ENV SERVER_BIND_HOST="0.0.0.0"
 ENV SERVER_BIND_PORT="8080"
