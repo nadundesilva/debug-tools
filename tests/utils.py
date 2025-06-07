@@ -47,7 +47,7 @@ def wait_for_container(
     interval = 5
     start_time = time.time()
 
-    print("Waiting for container to start running")
+    print(f"Waiting for container {container.id} to start running")
     while time.time() - start_time < timeout:
         container.reload()
         if container.attrs["State"]["Status"] == "running":
@@ -70,4 +70,4 @@ def wait_for_container(
         print(f"Container {container.id} not yet healthy")
         time.sleep(interval)
 
-    pytest.fail(f"Container did not started up {timeout} seconds")
+    pytest.fail(f"Container {container.id} did not started up {timeout} seconds")
