@@ -1,11 +1,11 @@
 #checkov:skip=CKV_DOCKER_2: Not required since nothing is running
 FROM ubuntu:24.04
 
-# renovate: datasource=repology depName=ubuntu_24_04/curl
+# renovate: datasource=repology depName=ubuntu_24_04/curl versioning=deb
 ARG CURL_VERSION="8.5.0-2ubuntu10.6"
-# renovate: datasource=repology depName=ubuntu_24_04/wget
+# renovate: datasource=repology depName=ubuntu_24_04/wget versioning=deb
 ARG WGET_VERSION="1.21.4-1ubuntu4.1"
-# renovate: datasource=repology depName=ubuntu_24_04/telnet
+# renovate: datasource=repology depName=ubuntu_24_04/telnet versioning=deb
 ARG TELNET_VERSION="0.17+2.5-3ubuntu4"
 
 ARG USER_ID="10000"
