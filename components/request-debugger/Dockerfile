@@ -1,4 +1,4 @@
-FROM node:24.1.0-alpine3.22
+FROM node:24.3.0-alpine3.22
 
 # renovate: datasource=repology depName=alpine_3_22/curl versioning=deb
 ARG CURL_VERSION="8.14.1-r1"
