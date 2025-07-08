@@ -5,4 +5,4 @@
 A collection of debug tools useful for debugging issues in Container environments.
 
 - [Request Debugger](./components/request-debugger/) - A server which logs all incoming requests
-- [Debug Container](./components/request-debugger/) - A container containing a collection of tools useful for debugging issues in Container environments.
+- [Debug Container](./components/debug-container/) - A container containing a collection of tools useful for debugging issues in Container environments.

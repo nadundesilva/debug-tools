@@ -1,5 +1,5 @@
 import random
-from typing import Generator
+from typing import Any, Callable, Dict, Generator, TypedDict, Unpack
 
 import docker
 import docker.models
@@ -25,22 +25,54 @@ def request_debugger_image(
     image.remove()
 
 
-def test_request_debugger_with_hello_response(
+class RequestDebuggerContainerArgs(TypedDict):
+    port: int
+    env: Dict[str, Any]
+
+
+@pytest.fixture
+def request_debugger_container(
     docker_client: docker.DockerClient,
     request_debugger_image: docker.models.images.Image,
+) -> Generator[
+    Callable[[Unpack[RequestDebuggerContainerArgs]], docker.models.containers.Container]
+]:
+    created_containers: list[docker.models.containers.Container] = []
+
+    def _container_creator(
+        **kwargs: Unpack[RequestDebuggerContainerArgs],
+    ) -> docker.models.containers.Container:
+        container = docker_client.containers.run(
+            image=request_debugger_image,
+            detach=True,
+            ports={str(kwargs["port"]): kwargs["port"]},
+            environment=kwargs["env"],
+        )
+        wait_for_container(container)
+        created_containers.append(container)
+        return container
+
+    yield _container_creator
+
+    for container in created_containers:
+        container.stop()
+        container.wait()
+        container.remove()
+
+
+def test_request_debugger_with_hello_response(
+    request_debugger_container: Callable[
+        [Unpack[RequestDebuggerContainerArgs]], docker.models.containers.Container
+    ],
 ) -> None:
     server_bind_port = 18080
-
-    container = docker_client.containers.run(
-        image=request_debugger_image,
-        detach=True,
-        ports={str(server_bind_port): server_bind_port},
-        environment={
+    request_debugger_container(
+        port=server_bind_port,
+        env={
             "SERVER_BIND_PORT": str(server_bind_port),
             "RESPONSE_CONTENT": "HELLO",
         },
     )
-    wait_for_container(container)
 
     resp = requests.get(
         f"http://localhost:{server_bind_port}/test-url-{random.randint(0, 1000)}"
@@ -48,27 +80,20 @@ def test_request_debugger_with_hello_response(
     assert resp.status_code == 200
     assert resp.json() == hello_world_response_body
 
-    container.stop()
-    container.wait()
-    container.remove()
-
 
 def test_request_debugger_with_echo_request_response(
-    docker_client: docker.DockerClient,
-    request_debugger_image: docker.models.images.Image,
+    request_debugger_container: Callable[
+        [Unpack[RequestDebuggerContainerArgs]], docker.models.containers.Container
+    ],
 ) -> None:
     server_bind_port = 18081
-
-    container = docker_client.containers.run(
-        image=request_debugger_image,
-        detach=True,
-        ports={str(server_bind_port): server_bind_port},
-        environment={
+    request_debugger_container(
+        port=server_bind_port,
+        env={
             "SERVER_BIND_PORT": str(server_bind_port),
             "RESPONSE_CONTENT": "REQUEST_PROPERTIES",
         },
     )
-    wait_for_container(container)
 
     req_path = f"/test-url-{random.randint(0, 1000)}"
     body_content = {"test-property": "debug-tools-test-property-value"}
@@ -95,30 +120,24 @@ def test_request_debugger_with_echo_request_response(
     assert req_cookies.items() <= dict(resp_content["cookies"]).items()
     assert resp_content["body"] == body_content
 
-    container.stop()
-    container.wait()
-    container.remove()
-
 
 @pytest.mark.parametrize(
     "server_bind_port,status_code", [(18181, 200), (18182, 401), (18183, 502)]
 )
 def test_request_debugger_with_different_status_code(
-    docker_client: docker.DockerClient,
-    request_debugger_image: docker.models.images.Image,
+    request_debugger_container: Callable[
+        [Unpack[RequestDebuggerContainerArgs]], docker.models.containers.Container
+    ],
     server_bind_port: int,
     status_code: int,
 ) -> None:
-    container = docker_client.containers.run(
-        image=request_debugger_image,
-        detach=True,
-        ports={str(server_bind_port): server_bind_port},
-        environment={
+    request_debugger_container(
+        port=server_bind_port,
+        env={
             "SERVER_BIND_PORT": str(server_bind_port),
             "RESPONSE_STATUS_CODE": str(status_code),
         },
     )
-    wait_for_container(container)
 
     resp = requests.get(
         f"http://localhost:{server_bind_port}/test-url-{random.randint(0, 1000)}"
@@ -126,6 +145,22 @@ def test_request_debugger_with_different_status_code(
     assert resp.status_code == status_code
     assert resp.json() == hello_world_response_body
 
-    container.stop()
-    container.wait()
-    container.remove()
+
+def test_health_check(
+    request_debugger_container: Callable[
+        [Unpack[RequestDebuggerContainerArgs]], docker.models.containers.Container
+    ],
+) -> None:
+    server_bind_port = 18082
+    health_check_path = f"/test-health-{random.randint(0, 1000)}"
+    request_debugger_container(
+        port=server_bind_port,
+        env={
+            "SERVER_BIND_PORT": str(server_bind_port),
+            "HEALTH_CHECK_PATH": health_check_path,
+        },
+    )
+
+    resp = requests.get(f"http://localhost:{server_bind_port}{health_check_path}")
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "OK"}

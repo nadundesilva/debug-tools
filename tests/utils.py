@@ -9,7 +9,7 @@ import pytest
 
 
 def build_image(
-    context_path: str, image_tag: str, docker_client: docker.client.DockerClient
+    context_path: str, image_tag: str, docker_client: docker.DockerClient
 ) -> docker.models.images.Image:
     try:
         print(f"Building Docker image '{image_tag}' from '{context_path}'...")

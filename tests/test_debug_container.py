@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Callable, Generator
 
 import docker
 import docker.models
@@ -23,22 +23,42 @@ def debug_container_image(
     docker_client.images.remove(image.id, force=True)
 
 
-def test_debug_container(
+@pytest.fixture
+def debug_container_container(
     docker_client: docker.DockerClient,
     debug_container_image: docker.models.images.Image,
-) -> None:
-    container = docker_client.containers.run(image=debug_container_image, detach=True)
-    wait_for_container(container)
+) -> Generator[Callable[[], docker.models.containers.Container], None, None]:
+    created_containers: list[docker.models.containers.Container] = []
 
+    def _container_creator() -> docker.models.containers.Container:
+        container = docker_client.containers.run(
+            image=debug_container_image, detach=True
+        )
+        wait_for_container(container)
+        created_containers.append(container)
+        return container
+
+    yield _container_creator
+
+    for container in created_containers:
+        container.stop()
+        container.wait()
+        container.remove()
+
+
+def test_debug_container(
+    debug_container_container: Callable[[], docker.models.containers.Container],
+) -> None:
+    container = debug_container_container()
     for tool in installed_tools:
         print(f"Checking if {tool} is installed")
         exit_code, output = container.exec_run(
             ["/bin/bash", "-c", f"command -v {tool}"],
-            user=debug_container_image.attrs["Config"]["User"],
+            user=(
+                container.image.attrs["Config"]["User"]
+                if container.image is not None
+                else "root"
+            ),
         )
         print(output.decode("utf-8"))
         assert exit_code == 0
-
-    container.stop()
-    container.wait()
-    container.remove()

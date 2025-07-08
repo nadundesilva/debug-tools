@@ -41,12 +41,13 @@ spec:
               cpu: "500m"
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: /_internal/health
               port: http-port
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
-            tcpSocket:
+            httpGet:
+              path: /_internal/health
               port: http-port
             initialDelaySeconds: 10
             periodSeconds: 10
