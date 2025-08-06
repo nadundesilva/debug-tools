@@ -1,7 +1,7 @@
 FROM node:24.4.1-alpine3.22 AS builder
 
 # renovate: datasource=npm depName=npm
-ARG NPM_VERSION="10.9.2"
+ARG NPM_VERSION="11.5.2"
 
 RUN npm i -g npm@${NPM_VERSION}
 
