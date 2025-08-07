@@ -6,7 +6,7 @@ ARG CURL_VERSION="8.5.0-2ubuntu10.6"
 # renovate: datasource=repology depName=ubuntu_24_04/wget versioning=deb
 ARG WGET_VERSION="1.21.4-1ubuntu4.1"
 # renovate: datasource=repology depName=ubuntu_24_04/inetutils versioning=deb
-ARG INETUTILS_VERSION="2.5-3ubuntu4"
+ARG INETUTILS_VERSION="2:2.5-3ubuntu4"
 
 ARG USER_ID="10000"
 ARG GROUP_ID="30000"
