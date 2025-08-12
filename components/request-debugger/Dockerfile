@@ -1,7 +1,7 @@
 FROM node:24.5.0-alpine3.22@sha256:e8e882c692a08878d55ec8ff6c5a4a71b3edca25eda0af4406e2a160d8a93cf2 AS builder
 
 # renovate: datasource=npm depName=npm
-ARG NPM_VERSION="10.9.3"
+ARG NPM_VERSION="11.5.2"
 
 RUN npm i -g npm@${NPM_VERSION}
 
