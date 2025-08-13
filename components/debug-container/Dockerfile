@@ -1,5 +1,5 @@
 #checkov:skip=CKV_DOCKER_2: Not required since nothing is running
-FROM ubuntu:24.04@sha256:a08e551cb33850e4740772b38217fc1796a66da2506d312abe51acda354ff061
+FROM ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
 
 # renovate: datasource=repology depName=ubuntu_24_04/curl versioning=deb
 ARG CURL_VERSION="8.5.0-2ubuntu10.6"
