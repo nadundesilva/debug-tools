@@ -9,7 +9,7 @@ This container runs a server, which will listen to all HTTP requests and log the
 
 ## Configurations
 
-The following environment variables can be used to configure the behaviour of the docker container.
+The following environment variables can be used to configure the behaviour of the Docker container.
 
 | Environment Variable   | Description                        | Default Value      |
 | ---------------------- | ---------------------------------- | ------------------ |
