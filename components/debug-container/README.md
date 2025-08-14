@@ -4,7 +4,7 @@ This container contains several tools useful for debugging issues in container e
 
 The following tools are currently installed in this container.
 
-- curl
+- cURL
 - wget
 - telnet
 
