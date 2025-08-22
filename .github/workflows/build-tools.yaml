@@ -4,7 +4,8 @@ on:
   - push
   - pull_request
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   run-super-linter:
@@ -19,6 +20,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Lint Code Base
         uses: super-linter/super-linter@5119dcd8011e92182ce8219d9e9efc82f16fddb6 # v8
         env:
@@ -36,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          persist-credentials: false
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
         with:
@@ -59,6 +63,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13.7"
@@ -94,6 +101,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        with:
+          persist-credentials: false
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
       - name: Set up Docker Buildx
@@ -102,7 +111,9 @@ jobs:
         with:
           install: true
       - name: Available platforms
-        run: echo ${{ steps.buildx.outputs.platforms }}
+        run: echo "${SUPPORTED_PLATFORMS}"
+        env:
+          SUPPORTED_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
       - name: Login to the Container registry
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
         with:
@@ -115,7 +126,7 @@ jobs:
           load: true
           tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.32.0
         with:
           image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
           format: "table"
