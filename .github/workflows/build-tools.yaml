@@ -126,7 +126,7 @@ jobs:
           load: true
           tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.32.0
+        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
         with:
           image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
           format: "table"
