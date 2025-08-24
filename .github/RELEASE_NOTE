@@ -4,8 +4,4 @@ Check the [Read Me](https://github.com/nadundesilva/debug-tools/tree/{{VERSION_T
 
 #### Changelog:
 
-- Add Request Debugger - A container used for logging requests data to debug any issues in it.
-- Add Debug Container - A container containing multiple useful tools for debugging
-  - cURL
-  - wget
-  - telnet
+- 
