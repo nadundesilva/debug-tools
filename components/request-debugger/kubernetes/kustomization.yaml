@@ -6,4 +6,4 @@ resources:
 images:
   - name: request-debugger
     newName: nadunrds/debug-tools-request-debugger
-    newTag: latest
+    newTag: 0.1.0

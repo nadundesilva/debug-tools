@@ -5,4 +5,4 @@ resources:
 images:
   - name: debug-container
     newName: nadunrds/debug-tools-debug-container
-    newTag: latest
+    newTag: 0.1.0
