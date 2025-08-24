@@ -31,4 +31,7 @@ RUN apt-get update && \
 SHELL ["/bin/bash", "-c"]
 USER ${USER_ID}:${GROUP_ID}
 
+#trivy:ignore:AVD-DS-0026:Not required since nothing is running
+HEALTHCHECK NONE
+
 ENTRYPOINT ["sleep", "infinity"]

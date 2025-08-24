@@ -15,8 +15,6 @@ env:
 permissions:
   contents: read
   packages: read
-  statuses: write
-  security-events: write
 
 jobs:
   build:
@@ -39,12 +37,15 @@ jobs:
     steps:
       - name: Preparing Git CLI
         run: |
-          git config --global user.name "${{ github.actor }}"
+          git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email nadunrds@gmail.com
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       - name: Setup Kubectl
         run: |
@@ -53,7 +54,7 @@ jobs:
         run: |
           setImageTag() {
             _TOOL="${1}"
-            _VERSION="${{ github.event.inputs.release-version }}"
+            _VERSION="${ARTIFACTS_VERSION}"
             _ARTIFACTS_DIR="$(pwd)/components/${_TOOL}/kubernetes"
 
             docker run --workdir=/artifacts --entrypoint=/app/kustomize \
@@ -67,15 +68,21 @@ jobs:
           setImageTag debug-container
           setImageTag request-debugger
 
-          git commit -m "[Automated] Preparing for Release v${{ github.event.inputs.release-version }}"
+          git commit -m "[Automated] Preparing for Release v${ARTIFACTS_VERSION}"
+        env:
+          ARTIFACTS_VERSION: ${{ github.event.inputs.release-version }}
       - name: Create Release Tag
         run: |
-          GITHUB_TAG="v${{ github.event.inputs.release-version }}"
+          GITHUB_TAG="v${ARTIFACTS_VERSION}"
           git tag "${GITHUB_TAG}"
           git push origin "${GITHUB_TAG}"
+        env:
+          ARTIFACTS_VERSION: ${{ github.event.inputs.release-version }}
       - name: Prepare Release Note
         run: |
-          sed -i 's/{{VERSION_TAG}}/v${{ github.event.inputs.release-version }}/g' .github/RELEASE_NOTE
+          sed -i "s/{{VERSION_TAG}}/v${ARTIFACTS_VERSION}/g" .github/RELEASE_NOTE
+        env:
+          ARTIFACTS_VERSION: ${{ github.event.inputs.release-version }}
       - name: Create Release
         id: create-release
         uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1

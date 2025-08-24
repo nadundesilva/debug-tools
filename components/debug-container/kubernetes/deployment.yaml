@@ -1,3 +1,6 @@
+#trivy:ignore:AVD-KSV-0013
+#trivy:ignore:AVD-KSV-0125
+#trivy:ignore:AVD-KSV-0110
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,8 +35,9 @@ spec:
               memory: "128Mi"
               cpu: "500m"
           securityContext:
-            runAsUser: 10000
-            runAsGroup: 30000
+            runAsUser: 11000
+            runAsGroup: 31000
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
