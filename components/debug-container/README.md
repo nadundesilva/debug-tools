@@ -11,4 +11,4 @@ The following tools are currently installed in this container.
 ## Deploying on Container Environments
 
 - Docker Image - `docker.io/nadunrds/debug-tools-debug-container:latest`
-- [Kubernetes Manifests](../../kubernetes/debug-container.yaml)
+- [Kubernetes Manifests](./kubernetes/)

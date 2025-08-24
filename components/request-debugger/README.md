@@ -5,7 +5,7 @@ This container runs a server, which will listen to all HTTP requests and log the
 ## Deploying on Container Environments
 
 - Docker Image - `docker.io/nadunrds/debug-tools-request-debugger:latest`
-- [Kubernetes Manifests](../../kubernetes/request-debugger.yaml)
+- [Kubernetes Manifests](.kubernetes/)
 
 ## Configurations
 

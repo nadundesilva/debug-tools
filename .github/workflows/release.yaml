@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      #checkov:skip=CKV_GHA_7:Release should be provided by user
+      release-version:
+        description: Release Version (Eg:- 1.0.0)
+        required: true
+        type: string
+
+env:
+  IMAGE_TAG_BASE: "nadunrds/debug-tools"
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+  security-events: write
+
+jobs:
+  build:
+    name: Build Release Artifacts
+    uses: ./.github/workflows/build.yaml
+    with:
+      version: ${{ github.event.inputs.release-version }}
+      publish-artifacts: true
+      update-latest-tag: true
+    secrets:
+      docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+  create-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    permissions:
+      contents: write
+    steps:
+      - name: Preparing Git CLI
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email nadunrds@gmail.com
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+      - name: Setup Kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - name: Commit Release Files
+        run: |
+          setImageTag() {
+            _TOOL="${1}"
+            _VERSION="${{ github.event.inputs.release-version }}"
+            _ARTIFACTS_DIR="$(pwd)/components/${_TOOL}/kubernetes"
+
+            docker run --workdir=/artifacts --entrypoint=/app/kustomize \
+                -v "$(pwd)/components/${_TOOL}/kubernetes:/artifacts" k8s.gcr.io/kustomize/kustomize:v3.8.7 \
+                edit set image "${_TOOL}=${{ env.IMAGE_TAG_BASE }}-${_TOOL}:${_VERSION}"
+
+            npx prettier --write "${_ARTIFACTS_DIR}"
+            git add "${_ARTIFACTS_DIR}"
+          }
+
+          setImageTag debug-container
+          setImageTag request-debugger
+
+          git commit -m "[Automated] Preparing for Release v${{ github.event.inputs.release-version }}"
+      - name: Create Release Tag
+        run: |
+          GITHUB_TAG="v${{ github.event.inputs.release-version }}"
+          git tag "${GITHUB_TAG}"
+          git push origin "${GITHUB_TAG}"
+      - name: Prepare Release Note
+        run: |
+          sed -i 's/{{VERSION_TAG}}/v${{ github.event.inputs.release-version }}/g' .github/RELEASE_NOTE
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.release-version }}
+          release_name: Kubernetes Replicator v${{ github.event.inputs.release-version }}
+          body_path: .github/RELEASE_NOTE
+          draft: false
+          prerelease: false
+      - name: Prepare for next release cycle
+        run: |
+          addToReleaseNote() {
+            echo "${1}" >> ".github/RELEASE_NOTE"
+          }
+
+          echo -n "" > ".github/RELEASE_NOTE"
+          addToReleaseNote "#### How to use"
+          addToReleaseNote ""
+          addToReleaseNote "Check the [Read Me](https://github.com/nadundesilva/debug-tools/tree/{{VERSION_TAG}}#how-to-use) for instructions on how to use the Operator."
+          addToReleaseNote ""
+          addToReleaseNote "#### Changelog:"
+          addToReleaseNote ""
+          addToReleaseNote "- "
+
+          git add .github/RELEASE_NOTE
+          git commit -m "[Automated] Preparing for next development iteration"
+          git push origin main

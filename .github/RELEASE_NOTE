@@ -1,0 +1,11 @@
+#### How to use
+
+Check the [Read Me](https://github.com/nadundesilva/debug-tools/tree/{{VERSION_TAG}}#how-to-use) for instructions on how to use the Operator.
+
+#### Changelog:
+
+- Add Request Debugger - A container used for logging requests data to debug any issues in it.
+- Add Debug Container - A container containing multiple useful tools for debugging
+  - cURL
+  - wget
+  - telnet

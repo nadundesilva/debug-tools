@@ -1,11 +1,33 @@
 name: Build
 
 on:
-  - push
-  - pull_request
+  workflow_call:
+    inputs:
+      version:
+        description: The version of the artifacts to be built
+        type: string
+        required: true
+      publish-artifacts:
+        description: Whether the artifacts should be published (true/false)
+        type: boolean
+        default: false
+      update-latest-tag:
+        description: Whether the latest tag should be updated to the current build (true/false)
+        type: boolean
+        default: false
+    secrets:
+      docker-hub-token:
+        required: false
+        description: Docker Hub token
+
+env:
+  IMAGE_TAG_BASE: "nadunrds/debug-tools"
 
 permissions:
   contents: read
+  packages: read
+  statuses: write
+  security-events: write
 
 jobs:
   run-super-linter:
@@ -88,7 +110,6 @@ jobs:
   build-tools:
     name: Build Tools
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     needs:
       - run-super-linter
       - run-vulnerability-analysis
@@ -103,6 +124,12 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           persist-credentials: false
+      - id: generate-artifacts-version
+        name: Generate Artifacts Version
+        env:
+          ARTIFACTS_VERSION: ${{ inputs.version }}
+        run: |
+          echo "artifacts-version=${ARTIFACTS_VERSION/\//-}" >> "${GITHUB_OUTPUT}"
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
       - name: Set up Docker Buildx
@@ -114,28 +141,39 @@ jobs:
         run: echo "${SUPPORTED_PLATFORMS}"
         env:
           SUPPORTED_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
-      - name: Login to the Container registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
-        with:
-          username: nadunrds
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build Docker Image for scanning
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
         with:
           context: ./components/${{ matrix.tool }}
           load: true
-          tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
+          tags: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
         with:
-          image-ref: nadunrds/debug-tools-${{ matrix.tool }}:latest
+          image-ref: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
           format: "table"
           exit-code: "1"
           ignore-unfixed: true
+
+      - name: Login to the Container registry
+        if: ${{ inputs.publish-artifacts == true }}
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        with:
+          username: nadunrds
+          password: ${{ secrets.docker-hub-token }}
       - name: Build & Push Docker Image
+        if: ${{ inputs.publish-artifacts == true }}
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
         with:
           context: ./components/${{ matrix.tool }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: nadunrds/debug-tools-${{ matrix.tool }}:latest
+          tags: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
+      - name: Build & Push Docker Image with latest Tag
+        if: ${{ inputs.publish-artifacts == true && inputs.update-latest-tag == true }}
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: ./components/${{ matrix.tool }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:latest

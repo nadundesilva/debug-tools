@@ -1,0 +1,22 @@
+name: Main Branch Build
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+  security-events: write
+
+jobs:
+  build:
+    name: Build Main Branch
+    uses: ./.github/workflows/build.yaml
+    with:
+      version: 0.0.0-${{ github.ref_name }}
+      publish-artifacts: true
+    secrets:
+      docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}

@@ -1,0 +1,19 @@
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+  security-events: write
+
+jobs:
+  build:
+    name: Check Pull Request
+    uses: ./.github/workflows/build.yaml
+    with:
+      version: 0.0.0-${{ github.sha }}

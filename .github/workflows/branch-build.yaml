@@ -1,0 +1,22 @@
+name: Branch Build
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "bug/**"
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+  security-events: write
+
+jobs:
+  build:
+    name: Build Branch
+    uses: ./.github/workflows/build.yaml
+    with:
+      version: 0.0.0-${{ github.ref_name }}
+    secrets:
+      docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}

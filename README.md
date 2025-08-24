@@ -1,6 +1,6 @@
 # Debug Tools
 
-[![Build](https://github.com/nadundesilva/debug-tools/actions/workflows/build-tools.yaml/badge.svg)](https://github.com/nadundesilva/debug-tools/actions/workflows/build-tools.yaml)
+[![Build](https://github.com/nadundesilva/debug-tools/actions/workflows/main-branch-build.yaml/badge.svg)](https://github.com/nadundesilva/debug-tools/actions/workflows/main-branch-build.yaml)
 
 A collection of debug tools useful for debugging issues in Container environments.
 
