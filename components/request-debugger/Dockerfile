@@ -1,4 +1,4 @@
-FROM node:24.6.0-alpine3.22@sha256:51dbfc749ec3018c7d4bf8b9ee65299ff9a908e38918ce163b0acfcd5dd931d9 AS builder
+FROM node:24.7.0-alpine3.22@sha256:be4d5e92ac68483ec71440bf5934865b4b7fcb93588f17a24d411d15f0204e4f AS builder
 
 # renovate: datasource=npm depName=npm
 ARG NPM_VERSION="11.5.2"
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . .
 RUN npm ci
 
-FROM node:24.6.0-alpine3.22@sha256:51dbfc749ec3018c7d4bf8b9ee65299ff9a908e38918ce163b0acfcd5dd931d9
+FROM node:24.7.0-alpine3.22@sha256:be4d5e92ac68483ec71440bf5934865b4b7fcb93588f17a24d411d15f0204e4f
 
 # renovate: datasource=repology depName=alpine_3_22/curl versioning=deb
 ARG CURL_VERSION="8.14.1-r1"
