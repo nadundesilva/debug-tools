@@ -1,0 +1,16 @@
+vulnerabilities:
+  - id: AVD-KSV-0110
+    statement: Exxpects the users to change the namespace as required
+    paths:
+      - "components/debug-container/kubernetes/deployment.yaml"
+      - "components/request-debugger/kubernetes/deployment.yaml"
+  - id: AVD-KSV-0013
+    statement: Kustomization sets the proper tag
+    paths:
+      - "components/debug-container/kubernetes/deployment.yaml"
+      - "components/request-debugger/kubernetes/deployment.yaml"
+  - id: AVD-KSV-0125
+    statement: This is released in DockerHub by default
+    paths:
+      - "components/debug-container/kubernetes/deployment.yaml"
+      - "components/request-debugger/kubernetes/deployment.yaml"

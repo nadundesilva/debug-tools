@@ -9,14 +9,12 @@ on:
         required: true
         type: string
 
-env:
-  IMAGE_TAG_BASE: "nadunrds/debug-tools"
-
 permissions:
   contents: read
   packages: read
-  statuses: write
-  security-events: write
+
+env:
+  IMAGE_TAG_BASE: "nadunrds/debug-tools"
 
 jobs:
   build:
@@ -26,6 +24,11 @@ jobs:
       version: ${{ github.event.inputs.release-version }}
       publish-artifacts: true
       update-latest-tag: true
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+      security-events: write
     secrets:
       docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
 
@@ -39,12 +42,15 @@ jobs:
     steps:
       - name: Preparing Git CLI
         run: |
-          git config --global user.name "${{ github.actor }}"
+          git config --global user.name "${GIT_USER_NAME}"
           git config --global user.email nadunrds@gmail.com
+        env:
+          GIT_USER_NAME: ${{ github.actor }}
       - name: Checkout repository
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
       - name: Setup Kubectl
         run: |
@@ -53,7 +59,7 @@ jobs:
         run: |
           setImageTag() {
             _TOOL="${1}"
-            _VERSION="${{ github.event.inputs.release-version }}"
+            _VERSION="${RELEASE_VERSION}"
             _ARTIFACTS_DIR="$(pwd)/components/${_TOOL}/kubernetes"
 
             docker run --workdir=/artifacts --entrypoint=/app/kustomize \
@@ -67,15 +73,21 @@ jobs:
           setImageTag debug-container
           setImageTag request-debugger
 
-          git commit -m "[Automated] Preparing for Release v${{ github.event.inputs.release-version }}"
+          git commit -m "[Automated] Preparing for Release v${RELEASE_VERSION}"
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.release-version }}
       - name: Create Release Tag
         run: |
-          GITHUB_TAG="v${{ github.event.inputs.release-version }}"
+          GITHUB_TAG="v${RELEASE_VERSION}"
           git tag "${GITHUB_TAG}"
           git push origin "${GITHUB_TAG}"
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.release-version }}
       - name: Prepare Release Note
         run: |
-          sed -i 's/{{VERSION_TAG}}/v${{ github.event.inputs.release-version }}/g' .github/RELEASE_NOTE
+          sed -i "s/{{VERSION_TAG}}/v${RELEASE_VERSION}/g" .github/RELEASE_NOTE
+        env:
+          RELEASE_VERSION: ${{ github.event.inputs.release-version }}
       - name: Create Release
         id: create-release
         uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1

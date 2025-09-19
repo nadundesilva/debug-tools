@@ -49,6 +49,7 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JAVASCRIPT_DEFAULT_STYLE: prettier
+          IGNORE_GITIGNORED_FILES: "true"
           VALIDATE_JAVASCRIPT_STANDARD: "false"
           VALIDATE_PYTHON_PYLINT: "false"
 

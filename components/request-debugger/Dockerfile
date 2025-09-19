@@ -14,7 +14,7 @@ FROM node:24.6.0-alpine3.22@sha256:51dbfc749ec3018c7d4bf8b9ee65299ff9a908e38918c
 # renovate: datasource=repology depName=alpine_3_22/curl versioning=deb
 ARG CURL_VERSION="8.14.1-r1"
 
-ARG USER_ID="10000"
+ARG USER_ID="20000"
 ARG GROUP_ID="30000"
 
 RUN apk update && \

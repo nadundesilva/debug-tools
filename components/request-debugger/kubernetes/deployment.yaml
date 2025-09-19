@@ -52,8 +52,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
           securityContext:
-            runAsUser: 10000
+            runAsUser: 20000
             runAsGroup: 30000
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
@@ -63,5 +64,6 @@ spec:
       securityContext:
         seccompProfile:
           type: RuntimeDefault
-        runAsUser: 10000
+        runAsUser: 20000
         runAsGroup: 30000
+        runAsNonRoot: true
