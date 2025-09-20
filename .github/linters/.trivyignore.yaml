@@ -1,4 +1,4 @@
-vulnerabilities:
+misconfigurations:
   - id: AVD-KSV-0110
     statement: Exxpects the users to change the namespace as required
     paths:
