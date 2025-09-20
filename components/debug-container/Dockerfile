@@ -1,4 +1,4 @@
-FROM ubuntu:24.04@sha256:7c06e91f61fa88c08cc74f7e1b7c69ae24910d745357e0dfe1d2c0322aaf20f9
+FROM ubuntu:24.04@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc
 
 # renovate: datasource=repology depName=ubuntu_24_04/curl versioning=deb
 ARG CURL_VERSION="8.5.0-2ubuntu10.6"
