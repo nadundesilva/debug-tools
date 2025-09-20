@@ -44,7 +44,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Lint Code Base
-        uses: super-linter/super-linter@5119dcd8011e92182ce8219d9e9efc82f16fddb6 # v8
+        uses: super-linter/super-linter@ffde3b2b33b745cb612d787f669ef9442b1339a6 # v8.1.0
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +64,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           scan-type: fs
           vuln-type: library
@@ -93,7 +93,7 @@ jobs:
         with:
           python-version: "3.13.7"
       - name: Set up Docker
-        uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4
+        uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4.3.0
       - name: Setup pipx
         run: |
           sudo apt update
@@ -132,10 +132,10 @@ jobs:
         run: |
           echo "artifacts-version=${ARTIFACTS_VERSION/\//-}" >> "${GITHUB_OUTPUT}"
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
         with:
           install: true
       - name: Available platforms
@@ -143,13 +143,13 @@ jobs:
         env:
           SUPPORTED_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
       - name: Build Docker Image for scanning
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: ./components/${{ matrix.tool }}
           load: true
           tags: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@dc5a429b52fcf669ce959baa2c2dd26090d2a6c4 # 0.32.0
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
         with:
           image-ref: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
           format: "table"
@@ -158,13 +158,13 @@ jobs:
 
       - name: Login to the Container registry
         if: ${{ inputs.publish-artifacts == true }}
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
         with:
           username: nadunrds
           password: ${{ secrets.docker-hub-token }}
       - name: Build & Push Docker Image
         if: ${{ inputs.publish-artifacts == true }}
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: ./components/${{ matrix.tool }}
           platforms: linux/amd64,linux/arm64
@@ -172,7 +172,7 @@ jobs:
           tags: ${{ env.IMAGE_TAG_BASE }}-${{ matrix.tool }}:${{ steps.generate-artifacts-version.outputs.artifacts-version }}
       - name: Build & Push Docker Image with latest Tag
         if: ${{ inputs.publish-artifacts == true && inputs.update-latest-tag == true }}
-        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
         with:
           context: ./components/${{ matrix.tool }}
           platforms: linux/amd64,linux/arm64
