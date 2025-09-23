@@ -20,14 +20,12 @@ on:
         required: false
         description: Docker Hub token
 
-env:
-  IMAGE_TAG_BASE: "nadunrds/debug-tools"
-
 permissions:
   contents: read
   packages: read
-  statuses: write
-  security-events: write
+
+env:
+  IMAGE_TAG_BASE: "nadunrds/debug-tools"
 
 jobs:
   run-super-linter:
@@ -57,6 +55,8 @@ jobs:
     name: Run Vulnerability Analysis
     runs-on: ubuntu-latest
     permissions:
+      contents: read
+      packages: read
       security-events: write
     steps:
       - name: Checkout
