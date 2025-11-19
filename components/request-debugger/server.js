@@ -36,13 +36,13 @@ const buildDebugRequestObject = (req) => {
   };
 };
 
-let respond = (req, res) => {
+let respond = (_req, res) => {
   res.status(500);
   res.json({ message: "Response not supported" });
 };
 switch (RESPONSE_CONTENT) {
   case RESPONSE_CONTENT_HELLO:
-    respond = (req, res) => {
+    respond = (_req, res) => {
       res.status(RESPONSE_STATUS_CODE);
       res.json({ message: "Hello from Request Debugger" });
     };
@@ -63,7 +63,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get(HEALTHCHECK_PATH, (req, res) => {
+app.get(HEALTHCHECK_PATH, (_req, res) => {
   res.status(200);
   res.send({ status: "OK" });
 });

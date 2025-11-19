@@ -48,8 +48,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JAVASCRIPT_DEFAULT_STYLE: prettier
           IGNORE_GITIGNORED_FILES: "true"
+          KUBERNETES_KUBECONFORM_OPTIONS: "--ignore-missing-schemas"
           VALIDATE_JAVASCRIPT_STANDARD: "false"
           VALIDATE_PYTHON_PYLINT: "false"
+          VALIDATE_BIOME_FORMAT: "false"
 
   run-vulnerability-analysis:
     name: Run Vulnerability Analysis
@@ -72,7 +74,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@96f518a34f7a870018057716cc4d7a5c014bd61c # v3
+        uses: github/codeql-action/upload-sarif@c3d42c5d08633d8b33635fbd94b000a0e2585b3c # v3.31.4
         if: always()
         with:
           sarif_file: trivy-results.sarif
@@ -93,7 +95,7 @@ jobs:
         with:
           python-version: "3.13.7"
       - name: Set up Docker
-        uses: docker/setup-docker-action@b60f85385d03ac8acfca6d9996982511d8620a19 # v4.3.0
+        uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
       - name: Setup pipx
         run: |
           sudo apt update

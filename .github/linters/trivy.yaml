@@ -1,1 +1,8 @@
 ignorefile: ".github/linters/.trivyignore.yaml"
+
+scan:
+  skip-dirs:
+    - node_modules
+    - __pycache__
+    - .mypy_cache
+    - .pytest_cache
