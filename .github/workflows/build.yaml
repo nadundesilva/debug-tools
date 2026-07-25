@@ -95,7 +95,7 @@ jobs:
         with:
           python-version: "3.13.7"
       - name: Set up Docker
-        uses: docker/setup-docker-action@efe9e3891a4f7307e689f2100b33a155b900a608 # v4.5.0
+        uses: docker/setup-docker-action@77e84dbf09b47d1e29270283c22f16145aa85ca1 # v5.4.0
       - name: Setup pipx
         run: |
           sudo apt update
