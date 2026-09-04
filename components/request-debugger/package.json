@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
-    "express": "~5.1.0"
+    "express": "~5.2.1"
   },
   "devDependencies": {
-    "prettier": "3.6.2"
+    "prettier": "3.9.6"
   }
 }
